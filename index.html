@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hello Analytics - A quickstart guide for JavaScript</title>
+
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.min.js"></script>
+<button id="auth-button" hidden>Authorize</button>
+<canvas id="myChart" width="600" height="300"></canvas>
+<canvas id="myChart2" width="600" height="300"></canvas>
+<canvas id="myChart3" width="600" height="300"></canvas>
+<canvas id="myChart4" width="600" height="300"></canvas>
+<script>
+  var DATE = new Date();
+  var date = {
+    today: DATE.getDate()
+  }
+
+  // Replace with your client ID from the developer console.
+  var CLIENT_ID = '535373131337-9l1amj4cqfqavl0jktab0vc055o59fk9.apps.googleusercontent.com';
+
+  // Set authorized scope.
+  var SCOPES = ['https://www.googleapis.com/auth/analytics.readonly'];
+
+
+  function authorize(event) {
+    // Handles the authorization flow.
+    // `immediate` should be false when invoked from the button click.
+    var useImmdiate = event ? false : true;
+    var authData = {
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      immediate: useImmdiate
+    };
+
+    gapi.auth.authorize(authData, function(response) {
+      var authButton = document.getElementById('auth-button');
+      if (response.error) {
+        authButton.hidden = false;
+      }
+      else {
+        authButton.hidden = true;
+        queryAccounts();
+      }
+    });
+  }
+
+
+function queryAccounts() {
+  // Load the Google Analytics client library.
+  gapi.client.load('analytics', 'v3').then(function() {
+
+    // Get a list of all Google Analytics accounts for this user
+    gapi.client.analytics.management.accounts.list().then(handleAccounts);
+  });
+}
+
+
+function handleAccounts(response) {
+  // Handles the response from the accounts list method.
+  if (response.result.items && response.result.items.length) {
+    // Get the first Google Analytics account.
+    var firstAccountId = response.result.items[0].id;
+
+    // Query for properties.
+    queryProperties(firstAccountId);
+  } else {
+    console.log('No accounts found for this user.');
+  }
+}
+
+
+function queryProperties(accountId) {
+  // Get a list of all the properties for the account.
+  gapi.client.analytics.management.webproperties.list(
+      {'accountId': accountId})
+    .then(handleProperties)
+    .then(null, function(err) {
+      // Log any errors.
+      console.log(err);
+  });
+}
+
+
+function handleProperties(response) {
+  // Handles the response from the webproperties list method.
+  if (response.result.items && response.result.items.length) {
+
+    // Get the first Google Analytics account
+    var firstAccountId = response.result.items[0].accountId;
+
+    // Get the first property ID
+    var firstPropertyId = response.result.items[0].id;
+
+    // Query for Views (Profiles).
+    queryProfiles(firstAccountId, firstPropertyId);
+  } else {
+    console.log('No properties found for this user.');
+  }
+}
+
+
+function queryProfiles(accountId, propertyId) {
+  // Get a list of all Views (Profiles) for the first property
+  // of the first Account.
+  gapi.client.analytics.management.profiles.list({
+      'accountId': accountId,
+      'webPropertyId': propertyId
+  })
+  .then(handleProfiles)
+  .then(null, function(err) {
+      // Log any errors.
+      console.log(err);
+  });
+}
+
+function handleProfiles(response) {
+  // Handles the response from the profiles list method.
+  if (response.result.items && response.result.items.length) {
+    // Get the first View (Profile) ID.
+    var firstProfileId = response.result.items[0].id;
+
+    // Query the Core Reporting API.
+    queryCoreReportingApi(firstProfileId);
+  } else {
+    console.log('No views (profiles) found for this user.');
+  }
+}
+
+
+function queryCoreReportingApi(profileId) {
+  // Query the Core Reporting API for the number sessions for
+  // the past seven days.
+  gapi.client.analytics.data.ga.get({
+    'ids': 'ga:' + profileId,
+    'start-date': '2016-01-01',
+    'end-date': '2016-12-01',
+    'filters': 'ga:month==05',
+    'dimensions': 'ga:day',
+    'metrics': 'ga:sessions'
+  })
+  .then(function(response) {
+    console.log(response);
+    var sessions = response.result.totalsForAllResults['ga:sessions'];
+
+    var formatedData = formatDailyData(sessions, response.result.rows, true);
+    createTrendChart("myChart", formatedData);
+
+    var formatedData = formatDailyData(sessions, response.result.rows, false);
+    createChart("myChart2", formatedData);
+  })
+  .then(null, function(err) {
+      // Log any errors.
+      console.log(err);
+  });
+
+
+  gapi.client.analytics.data.ga.get({
+    'ids': 'ga:' + profileId,
+    'start-date': '2016-05-01',
+    'end-date': '2016-05-31',
+    'filters': 'ga:continent==Europe,ga:subContinentCode==021',
+    'dimensions': 'ga:day',
+    'metrics': 'ga:sessions'
+  })
+  .then(function(response) {
+    console.log(response);
+    var sessions = response.result.totalsForAllResults['ga:sessions'];
+
+    var formatedData = formatDailyData(sessions, response.result.rows, true);
+    createTrendChart("myChart3", formatedData);
+
+    var formatedData = formatDailyData(sessions, response.result.rows, false);
+    createChart("myChart4", formatedData);
+  })
+  .then(null, function(err) {
+      // Log any errors.
+      console.log(err);
+  });
+
+
+}
+
+function formatDailyData(sessions, rawArray, accumulated) {
+  var dailyLabels = [];
+  var dailyData = [];
+  var dailyGoal = getDailyGoal(4000, rawArray.length, accumulated);
+  
+
+  for(i=0; i<rawArray.length; i++) {
+    console.log(i)
+    
+
+    dailyLabels.push(rawArray[i][0]);
+    if(i < date.today){ 
+      if(accumulated){
+
+        var value = parseInt(rawArray[i][1]);
+        if(i>0){
+          value = parseInt(value) + parseInt(dailyData[i-1]);
+        }
+        dailyData.push(value);  
+      }
+      else {
+        dailyData.push(rawArray[i][1]);
+      }
+    }
+  }
+
+  var formatedData = {
+    'dailyLabels': dailyLabels,
+    'dailyData': dailyData,
+    'dailyGoal': dailyGoal,
+    'trend' : getTrend(sessions, rawArray.length)
+  };
+  return formatedData;
+}
+
+function getDailyGoal(monthlyGoal, length, accumulated){
+  var dailyGoal = monthlyGoal/length;
+  var dailyTotalGoal = [];
+
+
+  for (var i = 1; i <= length; i++) {
+    if(accumulated) {
+      dailyTotalGoal.push(parseInt(dailyGoal*i));
+    }
+    else {
+      dailyTotalGoal.push(parseInt(dailyGoal));
+    }
+  };
+  return dailyTotalGoal;
+}
+
+function getTrend(currentSessions, length){
+  var trendSessions = length*currentSessions/date.today;
+
+  var dailyGoal = trendSessions/length;
+  var dailyTotalGoal = [];
+
+
+  for (var i = 1; i <= length; i++) {
+      dailyTotalGoal.push(parseInt(dailyGoal*i));
+  };
+  return dailyTotalGoal;
+}
+
+
+function createTrendChart(canvas, data){
+//   var ctx = document.getElementById(canvas).getContext("2d");
+  var ctx = document.getElementById(canvas);
+  var data = {
+    labels: data.dailyLabels,
+    datasets: [
+      {
+        label: "Sessions",
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: "rgba(75,192,192,0.4)",
+        borderColor: "rgba(75,192,192,1)",
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: "rgba(75,192,192,1)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(75,192,192,1)",
+        pointHoverBorderColor: "rgba(220,220,220,1)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        borderWidth: 2,
+        data: data.dailyData
+      },
+      {
+        label: "Goal",
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: "rgba(179,181,198,0.1)",
+        borderColor: "rgba(179,181,198,1)",
+        pointBorderColor: "rgba(179,181,198,0.5)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        backgroundColor: "rgba(179,181,198,0.1)",
+        pointHoverBorderColor: "rgba(220,220,220,0.5)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        borderWidth: 2,
+        data: data.dailyGoal,
+      },
+      {
+        label: "Trend",
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: "rgba(75,192,192,0.1)",
+        borderColor: "rgba(75,192,192,0.2)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(75,192,192,0.1)",
+        pointHoverBorderColor: "rgba(220,220,220,0.1)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        borderWidth: 2,
+        data: data.trend
+      }
+    ]
+  };
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: false
+    },
+  });
+}
+
+function createChart(canvas, data){
+  var ctx = document.getElementById(canvas);
+  var data = {
+    labels: data.dailyLabels,
+    datasets: [
+        {
+            label: "Sessions",
+            fill: true,
+            lineTension: 0.1,
+            backgroundColor: "rgba(75,192,192,0.4)",
+            borderColor: "rgba(75,192,192,1)",
+            pointBorderColor: "rgba(75,192,192,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+            pointHoverBorderColor: "rgba(220,220,220,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            borderWidth: 2,
+            data: data.dailyData
+        },
+        {
+            label: "Goal",
+            fill: true,
+            lineTension: 0.1,
+            backgroundColor: "rgba(179,181,198,0.1)",
+            borderColor: "rgba(179,181,198,0.5)",
+            pointBorderColor: "rgba(179,181,198,0.5)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            backgroundColor: "rgba(179,181,198,0.2)",
+            pointHoverBorderColor: "rgba(220,220,220,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            borderWidth: 2,
+            data: data.dailyGoal
+        }
+    ]
+};
+
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    options: {
+      responsive: false
+    },
+    data: data
+  });
+}
+
+// Add an event listener to the 'auth-button'.
+document.getElementById('auth-button').addEventListener('click', authorize);
+</script>
+
+<script src="https://apis.google.com/js/client.js?onload=authorize"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script> -->
+
+
+
+</body>
+</html>
