@@ -1,23 +1,24 @@
 var app = app || {};
 
-console.log('hello');
 var goal = app.queryUrl.goal || 3900; 
 var goal2 = app.queryUrl.goal2 || 3900; 
 
 var DATE = new Date();
 var date = {
 	today: DATE.getDate(),
-	currentMonth: DATE.getMonth()+1,
-	month: app.queryUrl.month || date.currentMonth
+	currentMonth: DATE.getMonth()+1
 }
-
+date.month = app.queryUrl.month || date.currentMonth;
 date.lastDay = new Date(2016, date.month, 0).getDate();
 
-if(date.month.length < 2){
+if(date.month.toString().length < 2){
 	date.month = "0"+date.month;
 }
 
-console.log(date);
+if(date.currentMonth > date.month) {
+	$('.js-global-today').parent().hide();
+	$('.js-global-trend').parent().hide();
+}
 
 
 document.getElementById('auth-button').addEventListener('click', authorize);
@@ -32,7 +33,6 @@ function queryMonth(profileId, startDate) {
     'metrics': 'ga:sessions'
   })
   .then(function(response) {
-  	console.log(response)
 
   	var sessions = response.result.totalsForAllResults['ga:sessions'];
   	drawData(sessions, response.result.rows[date.today-1], goal, $('.js-global-data'));
@@ -56,7 +56,6 @@ function queryMonth(profileId, startDate) {
     'metrics': 'ga:sessions'
   })
   .then(function(response) {
-  	console.log(response)
 
   	var sessions = response.result.totalsForAllResults['ga:sessions'];
   	drawData(sessions, response.result.rows[date.today-1], goal, $('.js-north-europe-data'));
@@ -106,7 +105,6 @@ function formatDailyData(sessions, goal, rawArray, isAccumulated) {
 
 
 function getDailyGoal(monthlyGoal, length, isAccumulated){
-  console.log(monthlyGoal);
   var dailyGoal = monthlyGoal/length;
   var dailyTotalGoal = [];
 
@@ -138,7 +136,6 @@ function getTrend(currentSessions, length){
 
 
 function drawChart(canvas, chartData){
-	console.log(canvas, chartData)
 	var ctx = document.getElementById(canvas);
 	var data = {
     	labels: chartData.dailyLabels,
@@ -156,10 +153,10 @@ function drawChart(canvas, chartData){
 
     var dailyData = app.extend(datasetModel, {
     	label: "Sessions",
-    	backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: "rgba(75,192,192,1)",
-        pointBorderColor: "rgba(75,192,192,1)",
-        pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    	backgroundColor: "rgba(33,150,243,0.4)",
+        borderColor: "rgba(33,150,243,1)",
+        pointBorderColor: "rgba(33,150,243,1)",
+        pointHoverBackgroundColor: "rgba(33,150,243,1)",
         pointHoverBorderColor: "rgba(220,220,220,1)",
     	data: chartData.dailyData
     });
@@ -167,10 +164,10 @@ function drawChart(canvas, chartData){
 
     var dailyGoal = app.extend(datasetModel, {
     	label: "Goal",
-    	backgroundColor: "rgba(75,192,192,0.2)",
-        borderColor: "#ECEFF1",
-        pointBorderColor: "rgba(75,192,192,0.3)",
-        pointHoverBackgroundColor: "rgba(75,192,192,0.3)",
+    	backgroundColor: "rgba(175,175,175,0.1)",
+        borderColor: "rgba(175,175,175,0.2)",
+        pointBorderColor: "rgba(175,175,175,0.2)",
+        pointHoverBackgroundColor: "rgba(175,175,175,0.3)",
         pointHoverBorderColor: "rgba(220,220,220,0.3)",
     	data: chartData.dailyGoal
     });
@@ -179,11 +176,11 @@ function drawChart(canvas, chartData){
     if(chartData.trend) {
     	var trend = app.extend(datasetModel, {
     		label: "Trend",
-	    	backgroundColor: "rgba(75,192,192,0.2)",
-	        borderColor: "rgba(75,192,192,0.3)",
-	        pointBorderColor: "rgba(75,192,192,0.3)",
-	        pointHoverBackgroundColor: "rgba(75,192,192,0.3)",
-	        pointHoverBorderColor: "rgba(220,220,220,0.3)",
+	    	backgroundColor: "rgba(33,150,243,0.1)",
+	        borderColor: "rgba(33,150,243,0.2)",
+	        pointBorderColor: "rgba(33,150,243,0.2)",
+	        pointHoverBackgroundColor: "rgba(33,150,243,0.2)",
+	        pointHoverBorderColor: "rgba(220,220,220,0.2)",
     		data: chartData.trend
     	});
     	data.datasets.push(trend);
@@ -193,20 +190,29 @@ function drawChart(canvas, chartData){
 	    type: 'line',
 	    data: data,
 	    options: {
+	    	legend: {
+	    		position: "bottom",
+	    		fullWidth: false,
+	    		labels: {
+	    			boxWidth: 15
+	    		}
+	    	}
 	    }
 	});
 }
 
 function drawData(total, today, goal, $parentEl){
-	var total = total;
-	var today = today[1];
-	var goal = goal;
-	var achieved = total*100/goal;
-	var trend = date.lastDay*total/date.today;
+	var totalFormatted = Number(total).toLocaleString();
+	var today = Number(today[1]).toLocaleString();
+	var formattedGoal = Number(goal).toLocaleString();
+	var achieved = (total*100/goal).toFixed(1);
+	var trend = Number(Math.round(date.lastDay*total/date.today)).toLocaleString();
+	var dom = (date.today*100/date.lastDay).toFixed(1);
 
-	$parentEl.find('.js-global-total').html(total);
+	$parentEl.find('.js-global-total').html(totalFormatted);
 	$parentEl.find('.js-global-today').html(today);
-	$parentEl.find('.js-global-goal').html(goal);
+	$parentEl.find('.js-global-goal').html(formattedGoal);
 	$parentEl.find('.js-global-achieved').html(achieved+"%");
+	$parentEl.find('.js-global-dom').html(dom+"% of month");
 	$parentEl.find('.js-global-trend').html(trend);
 }

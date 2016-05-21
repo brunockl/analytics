@@ -1,11 +1,16 @@
 .dash-chart {
-	width: 45%;
+	width: 49%;
 	display: inline-block;
 }
 .dash__title {
 	text-transform: uppercase;
 	font-size: 18px;	
 	font-weight: normal;
+}
+
+.data {
+	padding-bottom: 20px;
+	padding-left: 20px;
 }
 
 .data-item {
