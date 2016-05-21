@@ -1,7 +1,7 @@
 var app = app || {};
 
 var goal = app.queryUrl.goal || 3900; 
-var goal2 = app.queryUrl.goal2 || 3900; 
+var goal2 = app.queryUrl.goal2 || 3000; 
 
 var DATE = new Date();
 var date = {
@@ -58,12 +58,12 @@ function queryMonth(profileId, startDate) {
   .then(function(response) {
 
   	var sessions = response.result.totalsForAllResults['ga:sessions'];
-  	drawData(sessions, response.result.rows[date.today-1], goal, $('.js-north-europe-data'));
+  	drawData(sessions, response.result.rows[date.today-1], goal2, $('.js-north-europe-data'));
 	//accumulated chart
-	var formatedData = formatDailyData(sessions, goal, response.result.rows, true);
+	var formatedData = formatDailyData(sessions, goal2, response.result.rows, true);
 	drawChart('myChart3', formatedData);
 
-	var formatedData = formatDailyData(sessions, goal, response.result.rows, false);
+	var formatedData = formatDailyData(sessions, goal2, response.result.rows, false);
 	drawChart('myChart4', formatedData);
   })
   .then(null, function(err) {
@@ -175,6 +175,7 @@ function drawChart(canvas, chartData){
 
     if(chartData.trend) {
     	var trend = app.extend(datasetModel, {
+    		fill: false,
     		label: "Trend",
 	    	backgroundColor: "rgba(33,150,243,0.1)",
 	        borderColor: "rgba(33,150,243,0.2)",
