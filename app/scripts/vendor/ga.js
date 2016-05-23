@@ -17,13 +17,13 @@ function authorize(event) {
 
   gapi.auth.authorize(authData, function(response) {
     console.log('authorize')
-    var authButton = document.getElementById('auth-button');
+    var authOverlay = document.getElementById('auth-overlay');
     if (response.error) {
-      authButton.hidden = false;
+      authOverlay.hidden = false;
       console.log('authorize false')
     }
     else {
-      authButton.hidden = true;
+      authOverlay.hidden = true;
       queryAccounts();
     }
   });
