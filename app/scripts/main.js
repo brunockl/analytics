@@ -20,9 +20,13 @@ if(date.currentMonth > date.month) {
 	$('.js-global-trend').parent().hide();
 }
 
-
 document.getElementById('auth-button').addEventListener('click', authorize);
 document.getElementById('logout-button').addEventListener('click', unauthorize);
+
+// set form values
+$('.js-month-select').val(date.month);
+$('.js-goal-select').val(goal);
+$('.js-goal2-select').val(goal2);
 
 function queryMonth(profileId, startDate) {
   gapi.client.analytics.data.ga.get({
