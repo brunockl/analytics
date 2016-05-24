@@ -1,9 +1,11 @@
 // Replace with your client ID from the developer console.
 var CLIENT_ID = '535373131337-9l1amj4cqfqavl0jktab0vc055o59fk9.apps.googleusercontent.com';
-
 // Set authorized scope.
 var SCOPES = ['https://www.googleapis.com/auth/analytics.readonly'];
-var firstProfileId;
+var firstProfileId = '86512251';
+var firstAccountId = '51272588';
+var firstPropertyId =  'UA-51272588-1';
+
 
 function authorize(event) {
   // Handles the authorization flow.
@@ -49,7 +51,7 @@ function handleAccounts(response) {
   // Handles the response from the accounts list method.
   if (response.result.items && response.result.items.length) {
     // Get the first Google Analytics account.
-    var firstAccountId = response.result.items[0].id;
+    // var firstAccountId = response.result.items[0].id;
 
     // Query for properties.
     queryProperties(firstAccountId);
@@ -74,12 +76,13 @@ function queryProperties(accountId) {
 function handleProperties(response) {
   // Handles the response from the webproperties list method.
   if (response.result.items && response.result.items.length) {
+    console.log(response);
 
     // Get the first Google Analytics account
-    var firstAccountId = response.result.items[0].accountId;
+    // var firstAccountId = response.result.items[0].accountId;
 
     // Get the first property ID
-    var firstPropertyId = response.result.items[0].id;
+    // var firstPropertyId = response.result.items[0].id;
 
     // Query for Views (Profiles).
     queryProfiles(firstAccountId, firstPropertyId);
