@@ -12,7 +12,7 @@ date.month = app.queryUrl.month || date.currentMonth;
 date.lastDay = new Date(2016, date.month, 0).getDate();
 
 if(date.month.toString().length < 2){
-	date.month = "0"+date.month;
+	date.month = '0'+date.month;
 }
 
 if(date.currentMonth > date.month) {
@@ -152,23 +152,23 @@ function drawChart(canvas, chartData){
     };
 
     var dailyData = app.extend(datasetModel, {
-    	label: "Sessions",
-    	backgroundColor: "rgba(33,150,243,0.4)",
-        borderColor: "rgba(33,150,243,1)",
-        pointBorderColor: "rgba(33,150,243,1)",
-        pointHoverBackgroundColor: "rgba(33,150,243,1)",
-        pointHoverBorderColor: "rgba(220,220,220,1)",
+    	label: 'Sessions',
+    	backgroundColor: 'rgba(33,150,243,0.4)',
+        borderColor: 'rgba(33,150,243,1)',
+        pointBorderColor: 'rgba(33,150,243,1)',
+        pointHoverBackgroundColor: 'rgba(33,150,243,1)',
+        pointHoverBorderColor: 'rgba(220,220,220,1)',
     	data: chartData.dailyData
     });
     data.datasets.push(dailyData);
 
     var dailyGoal = app.extend(datasetModel, {
-    	label: "Goal",
-    	backgroundColor: "rgba(175,175,175,0.1)",
-        borderColor: "rgba(175,175,175,0.2)",
-        pointBorderColor: "rgba(175,175,175,0.2)",
-        pointHoverBackgroundColor: "rgba(175,175,175,0.3)",
-        pointHoverBorderColor: "rgba(220,220,220,0.3)",
+    	label: 'Goal',
+    	backgroundColor: 'rgba(175,175,175,0.1)',
+        borderColor: 'rgba(175,175,175,0.2)',
+        pointBorderColor: 'rgba(175,175,175,0.2)',
+        pointHoverBackgroundColor: 'rgba(175,175,175,0.3)',
+        pointHoverBorderColor: 'rgba(220,220,220,0.3)',
     	data: chartData.dailyGoal
     });
     data.datasets.push(dailyGoal);
@@ -176,12 +176,12 @@ function drawChart(canvas, chartData){
     if(chartData.trend) {
     	var trend = app.extend(datasetModel, {
     		fill: false,
-    		label: "Trend",
-	    	backgroundColor: "rgba(33,150,243,0.1)",
-	        borderColor: "rgba(33,150,243,0.2)",
-	        pointBorderColor: "rgba(33,150,243,0.2)",
-	        pointHoverBackgroundColor: "rgba(33,150,243,0.2)",
-	        pointHoverBorderColor: "rgba(220,220,220,0.2)",
+    		label: 'Trend',
+	    	backgroundColor: 'rgba(33,150,243,0.1)',
+	        borderColor: 'rgba(33,150,243,0.2)',
+	        pointBorderColor: 'rgba(33,150,243,0.2)',
+	        pointHoverBackgroundColor: 'rgba(33,150,243,0.2)',
+	        pointHoverBorderColor: 'rgba(220,220,220,0.2)',
     		data: chartData.trend
     	});
     	data.datasets.push(trend);
@@ -192,7 +192,7 @@ function drawChart(canvas, chartData){
 	    data: data,
 	    options: {
 	    	legend: {
-	    		position: "bottom",
+	    		position: 'bottom',
 	    		fullWidth: false,
 	    		labels: {
 	    			boxWidth: 15
@@ -213,7 +213,7 @@ function drawData(total, today, goal, $parentEl){
 	$parentEl.find('.js-global-total').html(totalFormatted);
 	$parentEl.find('.js-global-today').html(today);
 	$parentEl.find('.js-global-goal').html(formattedGoal);
-	$parentEl.find('.js-global-achieved').html(achieved+"%");
-	$parentEl.find('.js-global-dom').html(dom+"% of month");
+	$parentEl.find('.js-global-achieved').html(achieved+'%');
+	$parentEl.find('.js-global-dom').html(dom+'% of month');
 	$parentEl.find('.js-global-trend').html(trend);
 }
