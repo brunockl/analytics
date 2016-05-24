@@ -22,6 +22,27 @@
   <body>
     <a href="#" class="logout" id="logout-button">Logout</a>
     <section class="authorize" id="auth-overlay" hidden><button id="auth-button" class="btn auhtorize__btn">Authorize</button></section>
+    <div class="search">
+      <form action="/">
+        <select name="month" id="month" size="1" class="js-month-select">
+          <option value="01">January</option>
+          <option value="02">February</option>
+          <option value="03">March</option>
+          <option value="04">April</option>
+          <option value="05">May</option>
+          <option value="06">June</option>
+          <option value="07">July</option>
+          <option value="08">August</option>
+          <option value="09">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <input type="text" name="goal" size="6" class="js-goal-select">
+        <input type="text" name="goal2" size="6" class="js-goal2-select">
+        <input type="submit">
+      </form>
+    </div>
     <section class="dash-section">
       <h1 class="dash__title">Global Sessions</h1>
       <div class="data js-global-data">

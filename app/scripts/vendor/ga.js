@@ -14,7 +14,8 @@ function authorize(event) {
   var authData = {
     client_id: CLIENT_ID,
     scope: SCOPES,
-    immediate: useImmdiate
+    immediate: useImmdiate,
+    cookie_policy: 'single_host_origin'
   };
 
   gapi.auth.authorize(authData, function(response) {
