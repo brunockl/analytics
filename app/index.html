@@ -17,7 +17,7 @@
     <!-- build:css styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
-    
+
   </head>
   <body>
     <a href="#" class="logout" id="logout-button">Logout</a>
@@ -37,6 +37,12 @@
           <option value="10">October</option>
           <option value="11">November</option>
           <option value="12">December</option>
+        </select>
+        <select name="year" id="year" size="1" class="js-year-select">
+          <option value="2014">2014</option>
+          <option value="2015">2015</option>
+          <option value="2016">2016</option>
+          <option value="2017">2017</option>
         </select>
         <input type="text" name="goal" size="6" class="js-goal-select">
         <input type="text" name="goal2" size="6" class="js-goal2-select">
@@ -115,8 +121,8 @@
         <canvas id="myChart4"></canvas>
       </div>
     </section>
-    
-    
+
+
 
     <!-- build:js scripts/vendor.js -->
     <script src="scripts/vendor/ga.js"></script>
@@ -124,7 +130,7 @@
     <!-- bower:js -->
     <!-- endbower -->
     <!-- endbuild -->
-    
+
     <!-- build:js scripts/main.js -->
     <script src="scripts/helper/query-url.js"></script>
     <script src="scripts/helper/extend.js"></script>

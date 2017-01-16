@@ -1,14 +1,17 @@
 var app = app || {};
 
-var goal = app.queryUrl.goal || 3900; 
-var goal2 = app.queryUrl.goal2 || 3000; 
+var goal = app.queryUrl.goal || 3900;
+var goal2 = app.queryUrl.goal2 || 3000;
 
 var DATE = new Date();
 var date = {
 	today: DATE.getDate(),
-	currentMonth: DATE.getMonth()+1
-}
+	currentMonth: DATE.getMonth()+1,
+	currentYear: DATE.getFullYear()
+};
+
 date.month = app.queryUrl.month || date.currentMonth;
+date.year = app.queryUrl.year || date.currentYear;
 date.lastDay = new Date(2016, date.month, 0).getDate();
 
 if(date.month.toString().length < 2){
@@ -25,14 +28,15 @@ document.getElementById('logout-button').addEventListener('click', unauthorize);
 
 // set form values
 $('.js-month-select').val(date.month);
+$('.js-year-select').val(date.year);
 $('.js-goal-select').val(goal);
 $('.js-goal2-select').val(goal2);
 
 function queryMonth(profileId, startDate) {
   gapi.client.analytics.data.ga.get({
     'ids': 'ga:' + profileId,
-    'start-date': '2016-'+date.month+'-01',
-    'end-date': '2016-'+date.month+'-'+date.lastDay,
+    'start-date': date.year+'-'+date.month+'-01',
+    'end-date': date.year+'-'+date.month+'-'+date.lastDay,
     'dimensions': 'ga:day',
     'metrics': 'ga:sessions'
   })
@@ -40,12 +44,13 @@ function queryMonth(profileId, startDate) {
 
   	var sessions = response.result.totalsForAllResults['ga:sessions'];
   	drawData(sessions, response.result.rows[date.today-1], goal, $('.js-global-data'));
+
 	//accumulated chart
 	var formatedData = formatDailyData(sessions, goal, response.result.rows, true);
 	drawChart('myChart', formatedData);
 
-	var formatedData = formatDailyData(sessions, goal, response.result.rows, false);
-	drawChart('myChart2', formatedData);
+	var formatedAccumulatedData = formatDailyData(sessions, goal, response.result.rows, false);
+	drawChart('myChart2', formatedAccumulatedData);
   })
   .then(null, function(err) {
   });
@@ -67,8 +72,8 @@ function queryMonth(profileId, startDate) {
 	var formatedData = formatDailyData(sessions, goal2, response.result.rows, true);
 	drawChart('myChart3', formatedData);
 
-	var formatedData = formatDailyData(sessions, goal2, response.result.rows, false);
-	drawChart('myChart4', formatedData);
+	var formatedAccumulatedData = formatDailyData(sessions, goal2, response.result.rows, false);
+	drawChart('myChart4', formatedAccumulatedData);
   })
   .then(null, function(err) {
   });
@@ -80,17 +85,17 @@ function formatDailyData(sessions, goal, rawArray, isAccumulated) {
  	var dailyData = [];
  	for(var i=0; i<rawArray.length; i++) {
     	dailyLabels.push(rawArray[i][0]);
-	    if(i < date.today || date.currentMonth > date.month){ 
-			if(isAccumulated){
-				var value = parseInt(rawArray[i][1]);
-				if(i>0){
-				  	value = parseInt(value) + parseInt(dailyData[i-1]);
+	    if(i < date.today || date.currentMonth > date.month || date.currentYear > date.year){
+				if(isAccumulated){
+					var value = parseInt(rawArray[i][1]);
+					if(i>0){
+					  	value = parseInt(value) + parseInt(dailyData[i-1]);
+					}
+					dailyData.push(value);
 				}
-				dailyData.push(value);  
-			}
-			else {
-				dailyData.push(rawArray[i][1]);
-			}
+				else {
+					dailyData.push(rawArray[i][1]);
+				}
 	    }
 	}
 
@@ -100,7 +105,7 @@ function formatDailyData(sessions, goal, rawArray, isAccumulated) {
 	'dailyGoal': getDailyGoal(goal, rawArray.length, isAccumulated)
 	};
 
-	if(date.currentMonth == date.month && isAccumulated) {
+	if(date.currentMonth == date.month && date.currentYear == date.year && isAccumulated) {
 		formattedData.trend =  getTrend(sessions, rawArray.length);
 	}
 
@@ -190,7 +195,7 @@ function drawChart(canvas, chartData){
     	});
     	data.datasets.push(trend);
     }
-	
+
   	var myChart = new Chart(ctx, {
 	    type: 'line',
 	    data: data,

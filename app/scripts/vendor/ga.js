@@ -19,7 +19,6 @@ function authorize(event) {
   };
 
   gapi.auth.authorize(authData, function(response) {
-    console.log('authorize')
     var authOverlay = document.getElementById('auth-overlay');
     if (response.error) {
       authOverlay.hidden = false;
@@ -77,7 +76,6 @@ function queryProperties(accountId) {
 function handleProperties(response) {
   // Handles the response from the webproperties list method.
   if (response.result.items && response.result.items.length) {
-    console.log(response);
 
     // Get the first Google Analytics account
     // var firstAccountId = response.result.items[0].accountId;
@@ -119,6 +117,3 @@ function handleProfiles(response) {
     console.log('No views (profiles) found for this user.');
   }
 }
-
-
-
